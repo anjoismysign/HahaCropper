@@ -22,11 +22,11 @@ public class Cropper {
     }
 
     private static void openCropper() {
-        Uber<String> downscale = Uber.drive(" (drag a file first)");
+        Uber<String> sizeLabel = Uber.drive(" (drag a file first)");
         Uber<Image> toCrop = Uber.fly();
         Uber<Integer> toCropSize = Uber.drive(0);
         Uber<String> toCropFileName = Uber.fly();
-        AnjoTextField downscaleField = AnjoTextField.build("Downscale " + downscale.thanks())
+        AnjoTextField elements = AnjoTextField.build("Elements " + sizeLabel.thanks())
                 .addColorToText(TextInputType.INTEGER, Color.RED, false)
                 .addColorToText(TextInputType.INTEGER, Color.BLACK, true);
         BubbleFactory.getInstance().controller(anjoPane -> {
@@ -59,11 +59,11 @@ public class Cropper {
                             }
                             toCropSize.talk(width);
                             toCropFileName.talk(file.getName().replace(".png", "") + "-cropped.png");
-                            downscale.talk("Downscale (size: " + width + ")");
-                            downscaleField.getLabel().setText(downscale.thanks());
+                            sizeLabel.talk("Elements (size: " + width + ")");
+                            elements.getLabel().setText(sizeLabel.thanks());
                             toCrop.talk(image);
                         },
-                        downscaleField,
+                        elements,
                         AnjoComboBox.build("Split", List.of("12x", "16x", "32x")))
                 .onBlow(anjoPane -> {
                     Image image = toCrop.thanks();
@@ -73,7 +73,7 @@ public class Cropper {
                         return;
                     }
                     int size = anjoPane.getInteger(0).toOptional().orElse(0);
-                    if (size == 0) {
+                    if (size < 2) {
                         JOptionPane.showMessageDialog(null, "Invalid size.", "Error", JOptionPane.ERROR_MESSAGE);
                         System.exit(0);
                         return;
@@ -93,6 +93,9 @@ public class Cropper {
                     Graphics graphics = sourceBufferedImage.getGraphics();
                     graphics.drawImage(image, 0, 0, null);
                     graphics.dispose();
+
+                    size = split * size;
+                    System.out.println(size);
 
                     BufferedImage destinationBufferedImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
                     Graphics2D graphics2D = destinationBufferedImage.createGraphics();
